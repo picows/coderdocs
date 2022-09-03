@@ -1,0 +1,107 @@
+{% extends "docs-master.twig" %}
+
+{% block body_class %} class="docs-page"{% endblock body_class %}
+
+{% block toggler %}
+<button id="docs-sidebar-toggler" class="docs-sidebar-toggler docs-sidebar-visible me-2 d-xl-none" type="button">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+{% endblock toggler %}
+
+{% block search %}
+    <div class="top-search-box d-none d-lg-flex">
+        <form id="search_form" action="{{ "search"|link }}" class="search-form">
+            <input type="search" id="search_input" name="q" value="{{ search_terms|e('html_attr') }}" placeholder="Search the docs..." class="form-control search-input">
+            <button type="submit" class="btn search-btn" value="Search"><i class="fas fa-search"></i></button>
+        </form>
+        <script type="text/javascript">
+            // Intercept form submit and go to the search results page directly, avoiding a redirect
+            document.getElementById('search_form').addEventListener('submit', function (e) {
+                var search_terms = document.getElementById('search_input').value;
+                location.href = '{{ "search"|link }}/' + encodeURIComponent(search_terms);
+                e.preventDefault();
+            });
+        </script>
+    </div>
+{% endblock search %}
+
+{% block body %}
+    <div class="docs-wrapper">
+	    <div id="docs-sidebar" class="docs-sidebar">
+		    <div class="top-search-box d-lg-none p-3">
+                <form id="search_form2" action="{{ "search"|link }}" class="search-form">
+		            <input type="text" placeholder="Search the docs..." id="search_input" name="q" value="{{ search_terms|e('html_attr') }}" class="form-control search-input">
+		            <button type="submit" class="btn search-btn" value="Search"><i class="fas fa-search"></i></button>
+		        </form>
+                <script type="text/javascript">
+                    // Intercept form submit and go to the search results page directly, avoiding a redirect
+                    document.getElementById('search_form2').addEventListener('submit', function (e) {
+                        var search_terms = document.getElementById('search_input').value;
+                        location.href = '{{ "search"|link }}/' + encodeURIComponent(search_terms);
+                        e.preventDefault();
+                    });
+                </script>
+            </div>
+            {% block docs_nav %}
+		    <nav id="docs-nav" class="docs-nav navbar">
+			    <ul class="section-items list-unstyled nav flex-column pb-3">
+		        {% set i = 0 %}
+		        {% for page in pages(depthOffset=-1) if page.title and not page.hidden and page.id not in ["index"] %}
+    		        {% set i = i + 1 %}
+
+    				<li class="nav-item section-title"><a class="nav-link scrollto{% if page.id|split('/')[0] == current_page.id|split('/')[0] %} active{% endif %}" href="#{{ page.id|replace({'/': '-', '.': '-'}) }}"><span class="theme-icon-holder me-2"><i class="fa fa-{{ page.meta.Icon }}"></i></span><strong>{{i}}</strong>{{ ' - ' ~ page.title }}</a></li>
+    				{% if pages(page.id) %}
+        				{% for sub in pages(page.id)|sort_by("time") if page.title and not page.hidden %}
+        					<li class="nav-item"><a class="nav-link scrollto" href="#{{ sub.id|replace({'/': '-', '.': '-'}) }}">{{i}}.{{loop.index}}{{ ' - ' ~ sub.title }}</a></li>
+        				{% endfor %}
+    				{% endif %}
+				{% endfor %}
+			    </ul>
+		    </nav><!--//docs-nav-->
+		    {% endblock docs_nav %}
+	    </div><!--//docs-sidebar-->
+	    <div class="docs-content">
+		    <div class="container">
+		        {% block content %}
+		        {% set i = 0 %}
+		        {% set j = 0 %}
+		        {% for page in pages(depthOffset=-1)|sort_by("time") if page.title and not page.hidden and page.id not in ["index"] %}
+		        <article class="docs-article" id="{{ page.id|replace({'/': '-', '.': '-'}) }}">
+    		        {% set i = i + 1 %}
+
+    				<header class="docs-header">
+					    <h1 class="docs-heading"><strong>{{i}}</strong> - {{ page.title }}</h1>
+					    <section class="docs-intro">
+						    <p>{{ page.description }}</p>
+						</section><!--//docs-intro-->
+				    </header>
+    				{% if pages(page.id) %}
+        				{% for sub in pages(page.id)|sort_by("time") if page.title and not page.hidden %}
+                            {% set j = j + 1 %}
+                            <section class="docs-section" id="{{ sub.id|replace({'/': '-', '.': '-'}) }}">
+        						<h2 class="section-heading">{{i}}.{{j}} - {{ sub.title }}</h2>
+        						{{ sub.id|content }}
+        					</section><!--//section-->
+        				{% endfor %}
+        				{% set j = 0 %}
+    				{% endif %}
+                </article>
+				{% endfor %}
+
+			    <footer class="footer">
+				    <div class="container text-center py-5">
+				        <small class="copyright">Template Copyright &copy; <a href="https://themes.3rdwavemedia.com/" target="_blank">3rd Wave Media</a></small>
+				        <ul class="social-list list-unstyled pt-4 mb-0">
+						    {% block social %}
+								{{ parent() }}
+							{% endblock social %}
+				        </ul><!--//social-list-->
+				    </div>
+			    </footer>
+			    {% endblock content %}
+		    </div>
+	    </div>
+    </div><!--//docs-wrapper-->
+{% endblock body %}

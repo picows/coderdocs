@@ -1,0 +1,53 @@
+{% extends "index.twig" %}
+
+{% block content %}
+{% if search_terms %}
+    {% set search_results = pages|apply_search %}
+
+    <header class="docs-header mt-4 mb-5">
+        <h1 class="docs-heading" style="font-size:3rem">{{ search_results ? 'Search Results' : 'No Results' }}</h1>
+        <section class="docs-intro">
+    	    <p><strong>{{ search_results ?  search_results|length : 'No' }} page{{ search_results|length >1 ? 's' }} found</strong> for "<em>{{ search_terms|e('html') }}</em>" </p>
+    	</section><!--//docs-intro-->
+    </header>
+
+    {% if search_results %}
+        {% for page in search_results if page.title %}
+			{% set docspage = pages["_meta"].meta.DocsPage ?? page.id %}
+            <h3 class="mt-4">{{ loop.index }}. <a href="{{ docspage|link }}#{{ page.id|replace({'/': '-', '.': '-'}) }}">{{ page.title }}</a></h3>
+            {% if page.description %}
+				<p>{{ page.description }}</p>
+			{% else %}
+				<p>{{ page.id|content|striptags|slice(0, 120) }}</p>
+			{% endif %}
+        {% endfor %}
+
+    {% endif %}
+{% endif %}
+{% endblock content %}
+
+{% block docs_nav %}
+<nav id="docs-nav" class="docs-nav navbar">
+    <ul class="section-items list-unstyled nav flex-column pb-3">
+    {% set i = 0 %}
+    {% for page in pages(depthOffset=-1)|sort_by("time") if page.title and not page.hidden and page.id not in ["index"] %}
+        {% set i = i + 1 %}
+
+		<li class="nav-item section-title"><a class="nav-link" href="{% if pages["_meta"].meta.DocsPage %}{{base_url}}/{{ pages["_meta"].meta.DocsPage}}{% else %}{{ page.url }}{% endif %}#{{ page.id|replace({'/': '-', '.': '-'}) }}"><span class="theme-icon-holder me-2"><i class="{{ page.meta.IconClass }}"></i></span><strong>{{i}}</strong> - {{ page.title }}</a></li>
+		{% if pages(page.id) %}
+			{% for sub in pages(page.id)|sort_by("time") if page.title and not page.hidden %}
+				<li class="nav-item"><a class="nav-link" href="{% if pages["_meta"].meta.DocsPage %}{{base_url}}/{{ pages["_meta"].meta.DocsPage}}{% else %}{{ page.url }}{% endif %}#{{ sub.id|replace({'/': '-', '.': '-'}) }}">{{i}}.{{loop.index}} - {{ sub.title }}</a></li>
+			{% endfor %}
+		{% endif %}
+	{% endfor %}
+    </ul>
+</nav><!--//docs-nav-->
+{% endblock docs_nav %}
+
+{% block scripts %}
+<script>
+window.addEventListener('load', function(event) {
+   document.title = 'Search Results for "' + document.getElementById('search_input').value + '" |' + document.title.split("|")[1];
+});
+</script>
+{% endblock scripts %}

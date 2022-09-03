@@ -1,0 +1,85 @@
+{% extends "docs-master.twig" %}
+{% block body %}
+
+    <div class="page-header theme-bg-dark py-5 text-center position-relative">
+	    <div class="theme-bg-shapes-right"></div>
+	    <div class="theme-bg-shapes-left"></div>
+	    <div class="container">
+		    <h1 class="page-heading single-col-max mx-auto">{{ current_page.title }}</h1>
+		    <div class="page-intro single-col-max mx-auto">{{ current_page.meta.Subtitle }}</div>
+		    <div class="main-search-box pt-3 d-block mx-auto">
+                 <form id="search_form" action="{{ "search"|link }}" class="search-form w-100">
+		            <input type="text" id="search_input" name="q" value="{{ search_terms|e('html_attr') }}" placeholder="Search the docs..." class="form-control search-input">
+		            <button type="submit" class="btn search-btn" value="Search"><i class="fas fa-search"></i></button>
+		        </form>
+                <script type="text/javascript">
+                    // Intercept form submit and go to the search results page directly, avoiding a redirect
+                    document.getElementById('search_form').addEventListener('submit', function (e) {
+                        var search_terms = document.getElementById('search_input').value;
+                        location.href = '{{ "search"|link }}/' + encodeURIComponent(search_terms);
+                        e.preventDefault();
+                    });
+                </script>
+             </div>
+	    </div>
+    </div><!--//page-header-->
+    <div class="page-content">
+	    <div class="container">
+		    <div class="docs-overview py-5">
+			    <div class="row justify-content-center">
+			    {% for page in pages(current_page.id) if page.title and not page.hidden %}
+
+				    <div class="col-12 col-lg-4 py-3">
+					    <div class="card shadow-sm">
+						    <div class="card-body">
+							    <h5 class="card-title mb-3">
+								    <span class="theme-icon-holder card-icon-holder me-2">
+								        <i class="fa fa-{{ page.meta.Icon }}"></i>
+							        </span><!--//card-icon-holder-->
+							        <span class="card-title-text">{{ page.title }}</span>
+							    </h5>
+							    <div class="card-text">
+								    {{ page.description }}
+							    </div>
+							    {% set docspage = pages["_meta"].meta.DocsPage ?? page.id %}
+							    <a class="card-link-mask" href="{{ docspage|link }}#{{ page.id|replace({'/': '-', '.': '-'}) }}"></a>
+						    </div><!--//card-body-->
+					    </div><!--//card-->
+				    </div><!--//col-->
+
+				{% endfor %}
+			    </div><!--//row-->
+		    </div><!--//container-->
+		</div><!--//container-->
+    </div><!--//page-content-->
+
+    <section class="cta-section text-center py-5 theme-bg-dark position-relative">
+	    <div class="theme-bg-shapes-right"></div>
+	    <div class="theme-bg-shapes-left"></div>
+	    <div class="container">
+		    <h3 class="mb-2 text-white mb-3">{{ current_page.meta.Outro_Title }}</h3>
+		    <div class="section-intro text-white mb-3 single-col-max mx-auto">{{ content }}</div>
+		    <div class="pt-3 text-center">
+			    <a class="btn btn-light" href="{{ current_page.meta.Outro_ButtonLink}}">{{ current_page.meta.Outro_ButtonText }}&nbsp;<i class="fas fa-arrow-alt-circle-right ml-2"></i></a>
+		    </div>
+	    </div>
+    </section><!--//cta-section-->
+
+    <footer class="footer">
+
+	    <div class="footer-bottom text-center py-5">
+
+		    <ul class="social-list list-unstyled pb-4 mb-0">
+				{% block social %}
+					{{ parent() }}
+				{% endblock social %}
+	        </ul><!--//social-list-->
+
+	        <!--/* This template is free as long as you keep the footer attribution link. If you'd like to use the template without the attribution link, you can buy the commercial license via our website: themes.3rdwavemedia.com Thank you for your support. :) */-->
+            <small class="copyright">Designed with <i class="fas fa-heart" style="color: #fb866a;"></i> by <a class="theme-link" href="http://themes.3rdwavemedia.com" target="_blank">Xiaoying Riley</a> for developers</small>
+
+
+	    </div>
+
+    </footer>
+{% endblock body %}
