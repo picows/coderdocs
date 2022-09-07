@@ -99,6 +99,9 @@ document.addEventListener('gumshoeActivate', function (event) {
 	var docTitle = itemTitle + " |" + document.title.split("|")[1];
 	document.title = docTitle;
 
+	// https://stackoverflow.com/questions/20937280/how-to-change-url-without-changing-browser-history
+	history.replaceState(null, docTitle, event.detail.link.href);
+
 }, false);
 
 
